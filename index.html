@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Entrega Alimentaria</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f4f4f4; }
+    h1 { color: #333; }
+    .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); max-width: 400px; margin: auto; }
+    input, select, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; }
+    #reader { width: 100%; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <h1>🍽️ Registro de Entrega Alimentaria</h1>
+  <div class="card">
+    <div id="reader"></div>
+
+    <label>Documento del Estudiante</label>
+    <input type="text" id="documento" placeholder="Escanea o digita el documento">
+
+    <label>Estado de Entrega</label>
+    <select id="estado">
+      <option value="1">1 - Recibe</option>
+      <option value="2">2 - Doble Ración</option>
+      <option value="0">0 - No recibe</option>
+    </select>
+
+    <button onclick="registrar()">Registrar Entrega</button>
+  </div>
+
+  <script>
+    // Activar escáner QR / Código de barras
+    const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    scanner.render((decodedText) => {
+      document.getElementById("documento").value = decodedText;
+      scanner.clear();
+      document.getElementById("reader").style.display = "none";
+    });
+
+    function registrar() {
+      const documento = document.getElementById("documento").value;
+      const estado = document.getElementById("estado").value;
+      const fecha = new Date().toLocaleString();
+
+      if (!documento) return alert("Escanee o escriba un documento.");
+
+      const fila = `${fecha},${documento},${estado}\n`;
+      const blob = new Blob([fila], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "registro_entregas.csv";
+      a.click();
+
+      alert("✅ Registro guardado: " + documento + " (" + estado + ")");
+      document.getElementById("documento").value = "";
+    }
+  </script>
+</body>
+</html>
